@@ -13,10 +13,7 @@ auth_routes = Blueprint("auth_routes", __name__)
 @auth_routes.route("/login")
 def login():
     print("LOGIN...")
-    # this is a login page for either google or email/password auth (but the latter not implemented at the moment):
-    return render_template("login.html")
-    # if not using email/password auth, consider shortcut directly to google login:
-    #return redirect("/auth/google/login")
+    return redirect("/auth/google/login")
 
 @auth_routes.route("/auth/google/login")
 def google_login():
@@ -69,7 +66,7 @@ def google_oauth_callback():
 
     else:
         print("NO USER INFO")
-    return redirect("/")
+    return redirect("/user/reserve")
 
 @auth_routes.route("/logout")
 def logout():

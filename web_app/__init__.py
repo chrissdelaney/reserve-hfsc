@@ -17,8 +17,6 @@ load_dotenv()
 
 SECRET_KEY = os.getenv("SECRET_KEY", default="super secret") # IMPORTANT: override in production
 
-APP_TITLE = "My App"
-
 # https://icons.getbootstrap.com/
 NAV_ICON_CLASS = "bi-globe"
 
@@ -29,10 +27,6 @@ NAV_COLOR_CLASS = "navbar-dark bg-primary"
 # for google oauth login:
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
-
-# for google analytics (universal analytics):
-GA_TRACKER_ID = os.getenv("GA_TRACKER_ID", default="G-OOPS")
-#GA_DOMAIN = os.getenv("GA_DOMAIN", default="http://localhost:5000") # in production set to "________"
 
 
 def create_app(spreadsheet_service=None):
@@ -54,18 +48,10 @@ def create_app(spreadsheet_service=None):
     app.config["SECRET_KEY"] = SECRET_KEY
 
     # for front-end (maybe doesn't belong here but its ok):
-    app.config["APP_ENV"] = APP_ENV
-    app.config["APP_VERSION"] = APP_VERSION
-    app.config["APP_TITLE"] = APP_TITLE
+    app.config["APP_TITLE"] = "Reserve HFSC"
     app.config["NAV_ICON_CLASS"] = NAV_ICON_CLASS
     app.config["NAV_COLOR_CLASS"] = NAV_COLOR_CLASS
 
-    # for client-side google analytics:
-    app.config["GA_TRACKER_ID"] = GA_TRACKER_ID
-    #app.config["GA_DOMAIN"] = GA_DOMAIN
-
-    # set timezone to mimic production mode when running locally:
-    os.environ["TZ"] = "UTC"
 
     #
     # AUTH

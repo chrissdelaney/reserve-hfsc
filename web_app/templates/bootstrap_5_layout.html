@@ -75,14 +75,12 @@
     -->
     {% set public_nav = [
       ('/about', 'about', 'About'),
-      ('/products', 'products', 'Products'),
-      ('/login', 'login', 'Login'),
+      ('/login', 'login', 'Login with Georgetown netID'),
     ] -%}
 
     {% set protected_nav = [
-      ('/about', 'about', 'About'),
-      ('/products', 'products', 'Products'),
-      ('/user/orders', 'user_orders', 'Orders'),
+      ('/user/reserve', 'reserve', 'Reserve a Room'),
+      ('/user/reservations', 'reservations', 'My Reservations'),
     ] -%}
 
     {% set active_page = active_page|default('home') -%}
@@ -156,7 +154,7 @@
             <div class="row">
                 <div class="col-sm-6" style="display: inline; margin-bottom: 5px;">
                     <p class="small">
-                        &copy; Copyright 2023 Your Name Here
+                        &copy; Copyright 2023 - Chris Delaney, Sydney Winter, Louisa Baxter
                     </p>
                     <p class="small">
                         Made with the <a href="https://github.com/prof-rossetti/flask-sheets-template-2023">Flask Google Sheets Template</a>

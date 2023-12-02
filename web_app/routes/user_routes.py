@@ -9,14 +9,14 @@ user_routes = Blueprint("user_routes", __name__)
 # USER ORDERS
 #
 
-@user_routes.route("/user/orders")
+@user_routes.route("/user/reservations")
 @authenticated_route
-def orders():
-    print("USER ORDERS...")
+def reservations():
+    print("USER RESERVATIONS...")
     current_user = session.get("current_user")
     service = current_app.config["SPREADSHEET_SERVICE"]
-    orders = service.get_user_orders(current_user["email"])
-    return render_template("user_orders.html", orders=orders)
+    reservations = service.get_reservations(current_user["email"])
+    return render_template("reservations.html", reservations=reservations)
 
 
 @user_routes.route("/user/orders/create", methods=["POST"])

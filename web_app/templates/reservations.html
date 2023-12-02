@@ -1,0 +1,44 @@
+{% extends "bootstrap_5_layout.html" %}
+{% set active_page = "reservations" %}
+
+{% block content %}
+
+    <h1>Your Reservations</h1>
+
+    <p class="lead">Here are your reservations:</p>
+
+    {% if reservations|length == 0 %}
+        <p class="lead" >You do not have any reservations. Go to the
+            <a href="/reserve">reserve page</a>!
+        </p>
+    {% else %}
+        <div class="table-responsive">
+            <table class="table table-hover text-center">
+                <thead>
+                    <tr>
+                        <th scope="col">Date</th>
+                        <th scope="col">Time</th>
+                        <th scope="col">Room</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                {% for r in reservations %}
+                    <tr>
+                        <td>
+                            {{ r.date }}
+                        </td>
+                        <td>
+                            {{ r.time }}
+                        </td>
+                        <td>
+                            {{ r.room }}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+
+{% endblock %}
