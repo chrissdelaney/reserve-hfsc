@@ -15,40 +15,24 @@ def reservations():
     print("USER RESERVATIONS...")
     current_user = session.get("current_user")
     service = current_app.config["SPREADSHEET_SERVICE"]
-    reservations = service.get_reservations(current_user["email"])
+    reservations = service.get_student_reservations(current_user["email"])
     return render_template("reservations.html", reservations=reservations)
 
 
-@user_routes.route("/user/orders/create", methods=["POST"])
+@user_routes.route("/user/reserve")
 @authenticated_route
-def create_order():
-    print("CREATE USER ORDER...")
-
-    form_data = dict(request.form)
-    print("FORM DATA:", form_data)
-    product_id = form_data["product_id"]
-    product_name = form_data["product_name"]
-    product_price = form_data["product_price"]
-
-    current_user = session.get("current_user")
-    user_email = current_user["email"]
-
+def reserve():
+    print("RESERVE A ROOM...")
     service = current_app.config["SPREADSHEET_SERVICE"]
-    try:
-        new_order = {
-            "user_email": user_email,
-            "product_id": int(product_id),
-            "product_name": product_name,
-            "product_price": float(product_price)
-        }
-        service.create_order(new_order)
-        flash(f"Order received!", "success")
-        return redirect("/user/orders")
-    except Exception as err:
-        print(err)
-        flash(f"Oops, something went wrong: {err}", "warning")
-        return redirect("/products")
+    schedule = service.get_upcoming_week_reservations()
+    return render_template("reserve.html", schedule=schedule)
 
+@user_routes.route("/user/reserve")
+@authenticated_route
+def reserve_room():
+    print("MAKING RESERVATION...")
+    service = current_app.config["SPREADSHEET_SERVICE"]
+    schedule = service.get_upcoming_week_reservations()
 
 #
 # USER PROFILE

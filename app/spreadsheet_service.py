@@ -23,6 +23,8 @@ GOOGLE_CREDENTIALS_FILEPATH = os.getenv("GOOGLE_CREDENTIALS_FILEPATH", default=D
 
 GOOGLE_SHEETS_DOCUMENT_ID = os.getenv("GOOGLE_SHEETS_DOCUMENT_ID", default="OOPS Please get the spreadsheet identifier from its URL, and set the 'GOOGLE_SHEETS_DOCUMENT_ID' environment variable accordingly...")
 
+DEFAULT_CELL_VALUE = repr({"8:00am": "", "10:00am": "", "12:00pm": "", "2:00pm": "", "4:00pm": "", "6:00pm": "", "8:00pm": "", "10:00pm": ""})
+
 
 class SpreadsheetService:
 
@@ -75,7 +77,7 @@ class SpreadsheetService:
             # TODO: implement adding a row in the sheet...
             return
         
-    def get_reservations(self, student_email):
+    def get_student_reservations(self, student_email):
         sheet = self.get_sheet("reservations")  # Assuming the sheet name is "reservations"
         all_records = sheet.get_all_records()  # Get all the data from the sheet
 
@@ -90,6 +92,32 @@ class SpreadsheetService:
                 student_reservations.append(reservation)
 
         return student_reservations
+    
+    def get_upcoming_week_reservations(self):
+        today = datetime.now().strftime("%m/%d/%Y")
+
+        print(today)
+
+        sheet = self.get_sheet("table")
+        dates = sheet.col_values(1)
+
+        try: #index logic from ChatGPT
+            start_index = dates.index(today) + 1
+            end_index = start_index + 6
+        except ValueError:
+            return "Date not found in sheet."
+        
+        upcoming_week_data = [sheet.row_values(i) for i in range(start_index, end_index + 1)]
+
+        formatted_data = []
+
+        for day in upcoming_week_data:
+            formatted_data.append({
+                "date": day[0],
+                "data": [json.loads(rd) for rd in day[1:len(day)]]
+            })
+
+        return formatted_data
 
 
     # WRITING DATA
@@ -145,10 +173,6 @@ if __name__ == "__main__":
 
     ss = SpreadsheetService()
 
-    ss.seed_products()
+    data = ss.get_upcoming_week_reservations()
+    print(data[0])
 
-    sheet, records = ss.get_records("products")
-
-    for record in records:
-        print("-----")
-        pprint(record)
