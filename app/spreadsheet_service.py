@@ -7,7 +7,7 @@
 # ... https://raw.githubusercontent.com/prof-rossetti/flask-sheets-template-2020/master/web_app/spreadsheet_service.py
 
 import os
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pprint import pprint
 import json
 
@@ -47,6 +47,13 @@ class SpreadsheetService:
         """
         date_format = "%Y-%m-%d %H:%M:%S.%f%z"
         return datetime.strptime(ts, date_format)
+    
+    @staticmethod
+    def get_next_week_dates():
+        today = datetime.now()
+        next_7_days = [today + timedelta(days=i) for i in range(7)]
+        formatted_dates = [date.strftime("%m/%d/%Y") for date in next_7_days]
+        return formatted_dates
 
     # READING DATA
     # ... TODO: consider passing the sheet or the sheet name, and getting the sheet only if necessary
@@ -93,31 +100,26 @@ class SpreadsheetService:
 
         return student_reservations
     
-    def get_upcoming_week_reservations(self):
-        today = datetime.now().strftime("%m/%d/%Y")
-
-        print(today)
+    def get_schedule_by_date(self, date_str):
 
         sheet = self.get_sheet("table")
         dates = sheet.col_values(1)
 
         try: #index logic from ChatGPT
-            start_index = dates.index(today) + 1
-            end_index = start_index + 6
+            start_index = dates.index(date_str) + 1
         except ValueError:
             return "Date not found in sheet."
         
-        upcoming_week_data = [sheet.row_values(i) for i in range(start_index, end_index + 1)]
+        upcoming_week_data = sheet.row_values(start_index)
 
-        formatted_data = []
-
-        for day in upcoming_week_data:
-            formatted_data.append({
-                "date": day[0],
-                "data": [json.loads(rd) for rd in day[1:len(day)]]
-            })
+        formatted_data = {
+                "date": upcoming_week_data[0],
+                "data": [json.loads(rd) for rd in upcoming_week_data[1:len(upcoming_week_data)]]
+            }
 
         return formatted_data
+    
+    
 
 
     # WRITING DATA

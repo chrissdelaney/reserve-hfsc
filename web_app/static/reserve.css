@@ -1,0 +1,10 @@
+.reserve-btn {
+    margin: 5px !important;
+
+    background-color: #0d6efd !important;
+    border-radius: 5px !important;
+}
+
+.reserve-btn:hover {
+    background-color: #5499ff !important;
+}
