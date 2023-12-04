@@ -88,4 +88,4 @@ def create_app(spreadsheet_service=None):
 
 if __name__ == "__main__":
     my_app = create_app()
-    my_app.run(debug=True)
+    my_app.run()

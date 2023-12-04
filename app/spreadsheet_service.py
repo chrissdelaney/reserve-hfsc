@@ -65,24 +65,6 @@ class SpreadsheetService:
 
     def get_sheet(self, sheet_name):
         return self.doc.worksheet(sheet_name)
-
-    def get_row_data_by_date(self, date_str):
-        """
-           gets row data from sheet given a certain date 
-        """
-        sheet = self.get_sheet("table")
-        dates = sheet.col_values(1)
-        
-        if date_str in dates:
-            row_number = dates.index(str) + 1
-            row_data = sheet.row_values(row_number)
-
-            # Parse JSON data in each cell (excluding the date cell)
-            parsed_row_data = [json.loads(cell) if i > 0 else cell for i, cell in enumerate(row_data)]
-            return parsed_row_data
-        else:
-            # TODO: implement adding a row in the sheet...
-            return
         
     def get_student_reservations(self, student_email):
         sheet = self.get_sheet("reservations")  # Assuming the sheet name is "reservations"
@@ -148,6 +130,11 @@ class SpreadsheetService:
 
         self.add_reservation_record(student_name, student_email, res_date, res_time, res_room)
 
+        return json.dumps({
+            "statusCode": 200,
+            "message": "Successfully added reservation!"
+        })
+
 
 
     def add_reservation_record(self, student_name, student_email, res_date, res_time, res_room):
@@ -158,6 +145,9 @@ class SpreadsheetService:
         sheet.append_row(new_row)
 
         print(f"Sucessfully generated reservation record: {student_name} in Room {res_room} on {res_date} at {res_time}")
+
+    #TODO: funciton to cancel reservation
+    #TODO : function to remove record from reservations sheet (cancelation)
 
 class ReservatonTakenException(Exception):
     """

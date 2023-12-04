@@ -46,7 +46,7 @@
                     <td>
                         {% for time in schedule["data"][room_num].keys() %} <!--8 times-->
                             {% if schedule["data"][room_num][time] == ""%}
-                                <button class="reserve-btn" style="margin: 5px; background-color: #0d6efd; color: white; border-radius: 5px;">{{ time }}</button>
+                                <button class="reserve-btn" style="margin: 5px; background-color: #041e42; color: white; border-radius: 5px;">{{ time }}</button>
                             {% endif %}
                         {% endfor %}
                     </td>
@@ -60,13 +60,13 @@
         document.querySelectorAll(".reserve-btn").forEach(b => {
             b.addEventListener("click", (e) => {
                 let tr = e.target.parentNode.parentNode;
-                alert("clicked");
+                console.log(tr);
             });
             b.addEventListener("mouseover", () => {
-                b.style.backgroundColor = "#5499ff";
+                b.style.backgroundColor = "#63666A";
             });
             b.addEventListener("mouseout", () => {
-                b.style.backgroundColor = "#0d6efd";
+                b.style.backgroundColor = "#041E42";
             })
         });
 
