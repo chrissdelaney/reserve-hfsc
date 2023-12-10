@@ -38,14 +38,14 @@ class SpreadsheetService:
 
     @staticmethod
     def generate_timestamp():
-        return datetime.now(tz=timezone.utc)
+        return datetime.now(tz=timezone.utc).strftime("%m/%d/%Y %H:%M:%S")
 
     @staticmethod
-    def parse_timestamp(ts:str):
+    def parse_timestamp(ts: str):
         """
-            ts (str) : a timestamp string like '2023-03-08 19:59:16.471152+00:00'
+        ts (str): a timestamp string like '03/08/2023 19:59:16'
         """
-        date_format = "%Y-%m-%d %H:%M:%S.%f%z"
+        date_format = "%m/%d/%Y %H:%M:%S"
         return datetime.strptime(ts, date_format)
     
     @staticmethod
@@ -66,13 +66,13 @@ class SpreadsheetService:
     def get_sheet(self, sheet_name):
         return self.doc.worksheet(sheet_name)
         
-    def get_student_reservations(self, student_email, sheet_name="reservations"):
-        sheet = self.get_sheet(sheet_name)  
+    def get_student_reservations(self, student_email):
+        sheet = self.get_sheet("logs")  
         all_records = sheet.get_all_records()  # Get all the data from the sheet
 
         student_reservations = []
         for record in all_records: # ... TODO: some optimization, looping through each reservation may not be efficient. but this is fine for now
-            if record['student_email'] == student_email:
+            if record['student_email'] == student_email and record['status'] != "canceled":
                 reservation = {
                     'date': record['res_date'],
                     'time': record['res_time'],
@@ -106,8 +106,8 @@ class SpreadsheetService:
 
     # WRITING DATA
 
-    def add_reservation_to_table(self, student_name, student_email, res_date, res_time, res_room, sheet_name="table"):
-        sheet = self.get_sheet(sheet_name)
+    def add_reservation_to_table(self, student_name, student_email, res_date, res_time, res_room):
+        sheet = self.get_sheet("table")
 
         dates = sheet.col_values(1)
         if res_date in dates:
@@ -128,7 +128,7 @@ class SpreadsheetService:
 
         print(f"SUCCESSFULLY UPDATED CELL - {res_room} on {res_date} at {res_time}")
 
-        #self.add_reservation_record(student_name, student_email, res_date, res_time, res_room)
+        self.__add_reservation_record(student_name, student_email, res_date, res_time, res_room)
 
         return json.dumps({
             "statusCode": 200,
@@ -136,19 +136,65 @@ class SpreadsheetService:
         })
 
 
+    #PRIVATE METHOD: function only to be called by the add_reservation_to_table method...
+    def __add_reservation_record(self, student_name, student_email, res_date, res_time, res_room):
+        sheet = self.get_sheet("logs")
 
-    def add_reservation_record(self, student_name, student_email, res_date, res_time, res_room, sheet_name="reservations"):
-        sheet = self.get_sheet(sheet_name)
-
-        new_row = [self.generate_timestamp(), student_name, student_email, res_date, res_time, res_room]
+        new_row = [self.generate_timestamp(), student_name, student_email, res_date, res_time, res_room, "reserved"]
 
         sheet.append_row(new_row)
 
         print(f"Sucessfully generated reservation record: {student_name} in Room {res_room} on {res_date} at {res_time}")
 
-    #TODO: funciton to cancel reservation
-    #TODO : function to remove record from reservations sheet (cancelation)
+    def remove_reservation_from_table(self, student_name, student_email, res_date, res_time, res_room):
+        sheet = self.get_sheet("table")
 
+        dates = sheet.col_values(1)
+        if res_date in dates:
+            res_row = dates.index(res_date) + 1
+        else:
+            raise Exception(f"Reservation on {res_date} not found!")
+
+        res_cell = sheet.cell(res_row, res_room + 1)
+        res_cell_data = json.loads(res_cell.value)
+
+        if res_cell_data[res_time] == "":
+            raise ReservatonEmptyException(res_date, res_time, res_room)
+        else:
+            # Cancel the reservation by setting the email to an empty string
+            res_cell_data[res_time] = ""
+
+        sheet.update_cell(res_row, res_room + 1, json.dumps(res_cell_data))
+
+        print(f"SUCCESSFULLY CANCELED RESERVATION - {res_room} on {res_date} at {res_time}")
+
+        self.__remove_reservation_record(student_name, student_email, res_date, res_time, res_room)
+
+
+    def __remove_reservation_record(self, student_name, student_email, res_date, res_time, res_room):
+        sheet = self.get_sheet("logs")
+
+        all_records = sheet.get_all_records()
+
+
+        # Assume that there can be multiple matching records (edge case)
+        record_found = False
+        row_number = 2
+        for record in all_records:
+            if record['student_name'] == student_name and record['student_email'] == student_email and record['res_date'] == res_date and record['res_time'] == res_time and record['res_room'] == res_room and record['status'] == "reserved":
+                sheet.update_cell(row_number, 7, "canceled")
+                record_found = True
+            row_number += 1
+        
+        if not record_found:
+            raise Exception(f"No matching reservation found for {student_name} with {student_email} on {res_date} at {res_time} in Room {res_room}")
+
+
+        print(f"Successfully removed reservation for {student_name} ({student_email}) on {res_date} at {res_time} in Room {res_room}")
+
+
+
+#CLASSES FOR EXCEPTIONS
 class ReservatonTakenException(Exception):
     """
         This exception class is for when a user tries to reserve a slot that is already taken
@@ -159,6 +205,18 @@ class ReservatonTakenException(Exception):
 
         super().__init__(self.message)
 
+class ReservatonEmptyException(Exception):
+    """
+        This exception class is for when a user tries to reserve a slot that is already taken
+        Should never be called (prevented on the frontend), but a good catch
+    """
+    def __init__(self, date, time, room_number):
+        self.message = f"The reservation for room {room_number} on {date} at {time} does not exist, so you cannot cancel it!"
+
+        super().__init__(self.message)
+
+
+
 
 
 if __name__ == "__main__":
@@ -167,49 +225,3 @@ if __name__ == "__main__":
 
     data = ss.get_upcoming_week_reservations()
     print(data[0])
-
-
-
-def remove_reservation_from_table(self, student_name, student_email, res_date, res_time, res_room, sheet_name="reservations"):
-    sheet = self.get_sheet(sheet_name)
-
-    dates = sheet.col_values(1)
-    if res_date in dates:
-        res_row = dates.index(res_date) + 1
-    else:
-        raise Exception(f"Reservation on {res_date} not found!")
-
-    res_cell = sheet.cell(res_row, res_room + 1)
-    res_cell_data = json.loads(res_cell.value)
-
-    if res_cell_data[res_time] == "":
-        raise Exception(f"No reservation found on {res_date} at {res_time} for Room {res_room}")
-    else:
-        # Cancel the reservation by setting the email to an empty string
-        res_cell_data[res_time] = ""
-
-    sheet.update_cell(res_row, res_room + 1, json.dumps(res_cell_data))
-
-    print(f"SUCCESSFULLY CANCELED RESERVATION - {res_room} on {res_date} at {res_time}")
-
-
-def remove_reservation_from_record(self, student_name, student_email, res_date, res_time, res_room, sheet_name="reservations"):
-    sheet = self.get_sheet(sheet_name)
-
-    all_records = sheet.get_all_records()
-
-    matching_records = [record for record in all_records if record['student_name'] == student_name and
-                                                            record['student_email'] == student_email and
-                                                            record['res_date'] == res_date and
-                                                            record['res_time'] == res_time and
-                                                            record['res_room'] == res_room]
-
-    if not matching_records:
-        raise Exception(f"No matching reservation found for {student_name} with {student_email} on {res_date} at {res_time} in Room {res_room}")
-
-    # Assume that there can be multiple matching records (edge case)
-    for matching_record in matching_records:
-        row_number = matching_record['row_number']  # Assuming you have a 'row_number' column in your sheet
-        sheet.delete_row(row_number)
-
-    print(f"Successfully removed reservation for {student_name}, {student_email} on {res_date} at {res_time} in Room {res_room}")

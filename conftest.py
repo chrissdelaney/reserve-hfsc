@@ -12,22 +12,15 @@ from web_app import create_app
 load_dotenv()
 
 # an example sheet that is being used for testing purposes:
-GOOGLE_SHEETS_TEST_DOCUMENT_ID= os.getenv("GOOGLE_SHEETS_TEST_DOCUMENT_ID", default="1TZCr9x6CZmlccSKgpOkAIE6dCfRmS_83tSlb_GyALsw")
+GOOGLE_SHEETS_TEST_CREDENTIALS = os.path.join(os.path.dirname(__file__), "google-credentials-test.json")
+GOOGLE_SHEETS_TEST_DOCUMENT_ID= os.getenv("GOOGLE_SHEETS_TEST_DOCUMENT_ID")
 TEST_SLEEP = int(os.getenv("TEST_SLEEP", default="10"))
 
-# it would be nice to reset the database for each test, but we are hitting rate limits
-# we could consider using a single instance of the test database, but maybe that's worse than sleeping after each test?
 @pytest.fixture() # scope="module"
 def ss():
     """spreadsheet service to use when testing"""
-    ss = SpreadsheetService(document_id=GOOGLE_SHEETS_TEST_DOCUMENT_ID)
+    ss = SpreadsheetService(credentials_filepath=GOOGLE_SHEETS_TEST_CREDENTIALS, document_id=GOOGLE_SHEETS_TEST_DOCUMENT_ID)
 
-    # setup / remove any records that may exist:
-    #ss.destroy_all("products")
-    #ss.destroy_all("orders")
-
-    # seed default products:
-    #ss.seed_products()
 
     yield ss
 
