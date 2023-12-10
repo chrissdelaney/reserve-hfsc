@@ -66,8 +66,8 @@ class SpreadsheetService:
     def get_sheet(self, sheet_name):
         return self.doc.worksheet(sheet_name)
         
-    def get_student_reservations(self, student_email):
-        sheet = self.get_sheet("reservations")  # Assuming the sheet name is "reservations"
+    def get_student_reservations(self, student_email, sheet_name="reservations"):
+        sheet = self.get_sheet(sheet_name)  
         all_records = sheet.get_all_records()  # Get all the data from the sheet
 
         student_reservations = []
@@ -106,8 +106,8 @@ class SpreadsheetService:
 
     # WRITING DATA
 
-    def add_reservation_to_table(self, student_name, student_email, res_date, res_time, res_room):
-        sheet = self.get_sheet("table")
+    def add_reservation_to_table(self, student_name, student_email, res_date, res_time, res_room, sheet_name="table"):
+        sheet = self.get_sheet(sheet_name)
 
         dates = sheet.col_values(1)
         if res_date in dates:
@@ -128,7 +128,7 @@ class SpreadsheetService:
 
         print(f"SUCCESSFULLY UPDATED CELL - {res_room} on {res_date} at {res_time}")
 
-        self.add_reservation_record(student_name, student_email, res_date, res_time, res_room)
+        #self.add_reservation_record(student_name, student_email, res_date, res_time, res_room)
 
         return json.dumps({
             "statusCode": 200,
@@ -137,8 +137,8 @@ class SpreadsheetService:
 
 
 
-    def add_reservation_record(self, student_name, student_email, res_date, res_time, res_room):
-        sheet = self.get_sheet("reservations")
+    def add_reservation_record(self, student_name, student_email, res_date, res_time, res_room, sheet_name="reservations"):
+        sheet = self.get_sheet(sheet_name)
 
         new_row = [self.generate_timestamp(), student_name, student_email, res_date, res_time, res_room]
 
@@ -168,3 +168,48 @@ if __name__ == "__main__":
     data = ss.get_upcoming_week_reservations()
     print(data[0])
 
+
+
+def remove_reservation_from_table(self, student_name, student_email, res_date, res_time, res_room, sheet_name="reservations"):
+    sheet = self.get_sheet(sheet_name)
+
+    dates = sheet.col_values(1)
+    if res_date in dates:
+        res_row = dates.index(res_date) + 1
+    else:
+        raise Exception(f"Reservation on {res_date} not found!")
+
+    res_cell = sheet.cell(res_row, res_room + 1)
+    res_cell_data = json.loads(res_cell.value)
+
+    if res_cell_data[res_time] == "":
+        raise Exception(f"No reservation found on {res_date} at {res_time} for Room {res_room}")
+    else:
+        # Cancel the reservation by setting the email to an empty string
+        res_cell_data[res_time] = ""
+
+    sheet.update_cell(res_row, res_room + 1, json.dumps(res_cell_data))
+
+    print(f"SUCCESSFULLY CANCELED RESERVATION - {res_room} on {res_date} at {res_time}")
+
+
+def remove_reservation_from_record(self, student_name, student_email, res_date, res_time, res_room, sheet_name="reservations"):
+    sheet = self.get_sheet(sheet_name)
+
+    all_records = sheet.get_all_records()
+
+    matching_records = [record for record in all_records if record['student_name'] == student_name and
+                                                            record['student_email'] == student_email and
+                                                            record['res_date'] == res_date and
+                                                            record['res_time'] == res_time and
+                                                            record['res_room'] == res_room]
+
+    if not matching_records:
+        raise Exception(f"No matching reservation found for {student_name} with {student_email} on {res_date} at {res_time} in Room {res_room}")
+
+    # Assume that there can be multiple matching records (edge case)
+    for matching_record in matching_records:
+        row_number = matching_record['row_number']  # Assuming you have a 'row_number' column in your sheet
+        sheet.delete_row(row_number)
+
+    print(f"Successfully removed reservation for {student_name}, {student_email} on {res_date} at {res_time} in Room {res_room}")

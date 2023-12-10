@@ -23,19 +23,19 @@ def ss():
     ss = SpreadsheetService(document_id=GOOGLE_SHEETS_TEST_DOCUMENT_ID)
 
     # setup / remove any records that may exist:
-    ss.destroy_all("products")
-    ss.destroy_all("orders")
+    #ss.destroy_all("products")
+    #ss.destroy_all("orders")
 
     # seed default products:
-    ss.seed_products()
+    #ss.seed_products()
 
     yield ss
 
     # clean up:
     #ss.destroy_all("products")
     #ss.destroy_all("orders")
-    print("SLEEPING...")
-    sleep(TEST_SLEEP)
+    #print("SLEEPING...")
+    #sleep(TEST_SLEEP)
 
 
 
@@ -44,3 +44,4 @@ def test_client(ss):
     app = create_app(spreadsheet_service=ss)
     app.config.update({"TESTING": True})
     return app.test_client()
+

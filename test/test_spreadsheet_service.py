@@ -1,4 +1,5 @@
 import os
+import json
 from datetime import datetime, timezone
 
 from gspread import Spreadsheet as Document, Worksheet
@@ -6,6 +7,7 @@ from dotenv import load_dotenv
 import pytest
 
 from app.spreadsheet_service import SpreadsheetService
+from conftest import ss as spreadsheet_service
 
 load_dotenv()
 
@@ -13,145 +15,70 @@ CI_ENV = (os.getenv("CI", default="false") == "true")
 CI_SKIP_MESSAGE = "taking a lighter touch to testing on the CI server, to reduce API usage and prevent rate limits"
 
 
-def test_generate_timestamp():
-    #dt = ss.generate_timestamp()
-    dt = SpreadsheetService.generate_timestamp()
-    assert isinstance(dt, datetime)
-    assert dt.tzinfo == timezone.utc
+
+def test_reservations(ss):
+    student_name = "Louisa Baxter"
+    student_email = "lab357@georgetown.edu"
+    res_date = "12/15/2023"
+    res_time = "3:00pm"
+    res_room = 1
+
+    #print(ss.client.auth.service_account_email)
+    # Test add_reservation_to_table function
+    ss.add_reservation_to_table(student_name, student_email, res_date, res_time, res_room, sheet_name = "test_table")
+    
+     # Check if the reservation information is correctly added to the "table" sheet
+    sheet_table = ss.get_sheet("test_table")
+    cell_value = sheet_table.cell(1, res_room + 1).value  # Assuming the header is in row 1
+    cell_data = json.loads(cell_value)
+    assert cell_data[res_time] == student_email
+
+    # Test add_reservation_record function
+    ss.add_reservation_record(student_name, student_email, res_date, res_time, res_room, sheet_name="test_reservations")
+
+    # Check if the reservation information is correctly added to the "test_reservations" sheet
+    sheet_reservations = ss.get_sheet("test_reservations")
+    last_row = sheet_reservations.row_values(sheet_reservations.row_count)
+    assert last_row[1:] == [student_name, student_email, res_date, res_time, str(res_room)]
 
 
+def test_remove_reservation_table(ss):
+    student_name = "John Doe"
+    student_email = "xyz123@georgetown.edu"
+    res_date = "12/16/2023"
+    res_time = "4:00pm"
+    res_room = 2
 
-def test_parse_timestamp():
-    example_ts = "2023-03-08 19:59:16.471152+00:00"
-    #dt = ss.parse_timestamp(example_ts)
-    dt = SpreadsheetService.parse_timestamp(example_ts)
-    assert isinstance(dt, datetime)
-    assert dt.year == 2023
-    assert dt.month == 3
-    assert dt.day == 8
-    assert dt.hour == 19
-    assert dt.minute == 59
-    assert dt.second == 16
-    assert dt.tzinfo == timezone.utc
+    # Test add_reservation_to_table function
+    ss.add_reservation_to_table(student_name, student_email, res_date, res_time, res_room, sheet_name="test_table")
 
+    # Check if the reservation information is correctly added to the test sheet
+    sheet_table = ss.get_sheet("test_table")
+    cell_value_before_removal = sheet_table.cell(1, res_room + 1).value  #the header is in row 1
+    cell_data_before_removal = json.loads(cell_value_before_removal)
+    assert cell_data_before_removal[res_time] == student_email
 
-#
-# READING DATA
-#
+    # Test remove_reservation_from_table function
+    ss.remove_reservation_from_table(student_name, student_email, res_date, res_time, res_room, sheet_name="test_table")
 
-@pytest.mark.skipif(CI_ENV, reason=CI_SKIP_MESSAGE)
-def test_document(ss):
-    assert isinstance(ss.doc, Document)
+    # Check if the reservation information is correctly removed from the test sheet
+    cell_value_after_removal = sheet_table.cell(1, res_room + 1).value
+    cell_data_after_removal = json.loads(cell_value_after_removal)
+    assert cell_data_after_removal[res_time] == ""
 
+def test_remove_reservation_record(ss):
+    student_name = "John Doe"
+    student_email = "xyz123@georgetown.edu"
+    res_date = "12/16/2023"
+    res_time = "4:00pm"
+    res_room = 2
 
-@pytest.mark.skipif(CI_ENV, reason=CI_SKIP_MESSAGE)
-def test_get_sheet(ss):
-    sheet = ss.get_sheet("products")
-    assert isinstance(sheet, Worksheet)
+    # Add the reservation for testing purposes
+    ss.add_reservation_record(student_name, student_email, res_date, res_time, res_room, sheet_name="test_reservations")
 
-@pytest.mark.skipif(CI_ENV, reason=CI_SKIP_MESSAGE)
-def test_get_records(ss):
-    sheet, products = ss.get_records("products")
-    assert isinstance(sheet, Worksheet)
-    assert isinstance(products, list)
+    # Test remove_reservation_from_record function
+    ss.remove_reservation_from_record(student_name, student_email, res_date, res_time, res_room, sheet_name="test_reservations")
 
-@pytest.mark.skipif(CI_ENV, reason=CI_SKIP_MESSAGE)
-def test_get_products(ss):
-    products = ss.get_products()
-    assert len(products) == 3
-    assert [p["name"] for p in products] == ["Strawberries", "Cup of Tea", "Textbook"]
-    assert [p["id"] for p in products] == [1,2,3]
-
-@pytest.mark.skipif(CI_ENV, reason=CI_SKIP_MESSAGE)
-def test_get_orders(ss):
-    orders = ss.get_orders()
-    assert not any(orders)
-
-
-@pytest.mark.skipif(CI_ENV, reason=CI_SKIP_MESSAGE)
-def test_destroy_all(ss):
-    sheet, records = ss.get_records("products")
-    assert len(records) == 3
-
-    ss.destroy_all("products")
-
-    sheet, records = ss.get_records("products")
-    assert not any(records)
-
-
-#
-# WRITING DATA
-#
-
-@pytest.mark.skipif(CI_ENV, reason=CI_SKIP_MESSAGE)
-def test_create_product(ss):
-
-    sheet, products = ss.get_records("products")
-    assert len(products) == 3
-
-    new_product = {"name": "Mock Product", "price": 999.99, "description": "Testing 123...", "url": "https://picsum.photos/360/200"}
-    ss.create_product(new_product)
-
-    sheet, products = ss.get_records("products")
-    assert len(products) == 4
-
-    product = products[-1]
-    assert product["id"] == 4
-    assert product["name"] == "Mock Product"
-    assert product["price"] == 999.99
-    assert product["description"] == "Testing 123..."
-    assert product["url"] == "https://picsum.photos/360/200"
-    assert isinstance(product["created_at"], datetime)
-
-
-
-@pytest.mark.skipif(CI_ENV, reason=CI_SKIP_MESSAGE)
-def test_create_order(ss):
-    sheet, orders = ss.get_records("orders")
-    assert not any(orders)
-
-    ss.create_order({
-        "user_email": "example@test.com",
-        "product_id": 3,
-        "product_name": "Test Product",
-        "product_price": 4.99
-    })
-
-    sheet, orders = ss.get_records("orders")
-    assert len(orders) == 1
-
-    order = orders[0]
-    assert order["id"] == 1
-    assert order["user_email"] == "example@test.com"
-    assert order["product_id"] == 3
-    assert order["product_name"] == "Test Product"
-    assert order["product_price"] == 4.99
-    assert isinstance(order["created_at"], datetime)
-
-
-
-
-@pytest.mark.skipif(CI_ENV, reason=CI_SKIP_MESSAGE)
-def test_get_user_orders(ss):
-    user_email = "example@test.com"
-
-    user_orders = ss.get_user_orders(user_email)
-    assert not any(user_orders)
-
-    ss.create_orders([
-        {"user_email": user_email,      "product_id": 2, "product_name": "Product 2", "product_price": 4.99},
-        {"user_email": user_email,      "product_id": 2, "product_name": "Product 2", "product_price": 4.99},
-        {"user_email": user_email,      "product_id": 2, "product_name": "Product 2", "product_price": 4.99},
-        {"user_email": "other@yep.com", "product_id": 2, "product_name": "Product 2", "product_price": 4.99},
-        {"user_email": "other@yep.com", "product_id": 1, "product_name": "Product 1", "product_price": 5.99},
-        {"user_email": "other@yep.com", "product_id": 3, "product_name": "Product 3", "product_price": 6.99},
-    ])
-
-    user_orders = ss.get_user_orders(user_email)
-    assert len(user_orders) == 3
-    assert [o["id"] for o in user_orders] == [1,2,3]
-    assert [o["user_email"] for o in user_orders] == [user_email, user_email, user_email]
-    assert [o["product_id"] for o in user_orders] == [2,2,2]
-    assert [o["product_name"] for o in user_orders] == ["Product 2", "Product 2", "Product 2"]
-    assert [o["product_price"] for o in user_orders] == [4.99,4.99,4.99]
-    assert [isinstance(o["created_at"], datetime) for o in user_orders] == [True, True, True]
+    # Check if the reservation information is correctly removed from the test_reservations sheet
+    student_reservations = ss.get_student_reservations(student_email, sheet_name="test_reservations")
+    assert not any(reservation['date'] == res_date and reservation['time'] == res_time and reservation['room'] == res_room for reservation in student_reservations)
