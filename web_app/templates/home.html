@@ -1,13 +1,53 @@
 {% extends "bootstrap_5_layout.html" %}
-{% set active_page = "home" %}
+{% set active_page = "login" %}
 
 {% block content %}
+<head>
 
-    <h1>Welcome to Reserve HFSC</h1>
+<style>
+        $font-family-base: var(--#{$prefix}font-sans-serif); 
 
-    <p class="lead">Log in with your Georgetown account to make a reservation.</p>
+        .header-container {
+            position: center;
+            text-align: center;
+            overflow: hidden; 
+        }
 
-    <p>You can make a reservation at any time, up to a week in advance of the current date.</p>
-    <p>Reservations are made in 2-hour blocks, throughout the time that the HFSC is open.</p>
+        .img-fluid {
+            width: 100%;
+            height: auto; 
+            object-fit: cover;
+            margin: 0; 
+        }
+
+        .header-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: black;
+            background-color: white; 
+            padding: 40px; 
+            border-radius: 10px;
+            font-family: $font-family-base; 
+            text-align: center
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-container">
+        <img src="https://www.silman.com/wp-content/uploads/2020/06/Georgetown-University-Student-Center-04.jpg" class="img-fluid" alt="Georgetown University Student Center">
+        <div class="header-text">
+            <h1>WELCOME TO RESERVE HFSC</h1>
+            <p>Log in with your Georgetown account to make a reservation.</p>
+            <p>You can make a reservation at any time, up to a week in advance of the current date.</p>
+            <p>Reservations are made in 2-hour blocks, throughout the time that the HFSC is open.</p>
+        </div>
+    </div>
+
+</body>
+</html>
 
 {% endblock %}
+
