@@ -23,16 +23,15 @@
         }
         .reserve-btn:hover {
             background-color: #35404f;
-
         }
     </style>
+
+
 
     <div id="loading-spinner" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; display: none; justify-content: center; align-items: center; background-color: rgba(255, 255, 255, 0.5); z-index: 1050;">
         <div class="spinner-border text-secondary" role="status">
         </div>
     </div>
-
-
 
     <div class="reserve-header">
 
@@ -97,7 +96,7 @@
                 const roomNumber = tr.children[1].textContent.trim();
                 console.log(`${time}, ${date}, ${roomNumber}`);
                 
-                fetch(`/user/api/reserve-room?date=${date}&time=${time}&room=${roomNumber}`)
+                fetch(`/user/api/make-reservation?date=${date}&time=${time}&room=${roomNumber}`)
                 .then(r => {
                     console.log(r);
                     return r.json();

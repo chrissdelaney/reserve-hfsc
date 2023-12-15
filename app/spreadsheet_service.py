@@ -161,7 +161,7 @@ class SpreadsheetService:
         if res_cell_data[res_time] == "":
             raise ReservatonEmptyException(res_date, res_time, res_room)
         else:
-            # Cancel the reservation by setting the email to an empty string
+            #cancel the reservation by setting the email to an empty string
             res_cell_data[res_time] = ""
 
         sheet.update_cell(res_row, res_room + 1, json.dumps(res_cell_data))
@@ -169,6 +169,11 @@ class SpreadsheetService:
         print(f"SUCCESSFULLY CANCELED RESERVATION - {res_room} on {res_date} at {res_time}")
 
         self.__remove_reservation_record(student_name, student_email, res_date, res_time, res_room)
+
+        return json.dumps({
+            "statusCode": 200,
+            "message": "Successfully canceled reservation!"
+        })
 
 
     def __remove_reservation_record(self, student_name, student_email, res_date, res_time, res_room):
