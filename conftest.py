@@ -12,6 +12,7 @@ load_dotenv()
 
 # Get the document ID from environment variables
 GOOGLE_SHEETS_TEST_DOCUMENT_ID = os.getenv("GOOGLE_SHEETS_TEST_DOCUMENT_ID")
+print(f"GOOGLE_SHEETS_TEST_DOCUMENT_ID: {GOOGLE_SHEETS_TEST_DOCUMENT_ID}")
 TEST_SLEEP = int(os.getenv("TEST_SLEEP", default="10"))
 
 def get_google_credentials():
