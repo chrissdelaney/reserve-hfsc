@@ -27,7 +27,6 @@ def get_google_credentials():
         with open(credentials_filepath) as f:
             return json.load(f)
 
-
 @pytest.fixture()  # scope="module"
 def ss():
     """spreadsheet service to use when testing"""
