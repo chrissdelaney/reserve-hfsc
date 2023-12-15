@@ -53,7 +53,7 @@ def make_reservation():
 # USER PROFILE
 #
 
-@user_routes.route("/user/profile", methods=["POST"])
+@user_routes.route("/user/profile")
 @authenticated_route
 def profile():
     print("USER PROFILE...")
