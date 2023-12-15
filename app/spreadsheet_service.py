@@ -64,6 +64,10 @@ class SpreadsheetService:
         return self.doc.worksheet(sheet_name)
         
     def get_student_reservations(self, student_email):
+        """
+            no invalid student email exception is required, as this is handled by oauth
+        """
+
         sheet = self.get_sheet("logs")  
         all_records = sheet.get_all_records()  # Get all the data from the sheet
 
@@ -81,13 +85,20 @@ class SpreadsheetService:
     
     def get_schedule_by_date(self, date_str):
 
+        #test if date is more than 7 days in the future
+        today = datetime.now()
+        seven_days_future = today + timedelta(days=7)
+        input_date = datetime.strptime(date_str, "%m/%d/%Y")
+        if input_date > seven_days_future:
+            raise InvalidDateException("Invalid date, must be within a week of today.")
+
         sheet = self.get_sheet("table")
         dates = sheet.col_values(1)
 
         try:
             start_index = dates.index(date_str) + 1
         except ValueError:
-            self.__add_reservation_dates(date_str)
+            self.__add_reservation_dates(date_str) #adds new dates if it does not exist on the sheet
             start_index = dates.index(date_str) + 1 #write new rows to the sheet, now it will include the date...
         
         upcoming_week_data = sheet.row_values(start_index)
@@ -231,6 +242,15 @@ class ReservatonEmptyException(Exception):
     def __init__(self, date, time, room_number):
         self.message = f"The reservation for room {room_number} on {date} at {time} does not exist, so you cannot cancel it!"
 
+        super().__init__(self.message)
+
+class InvalidDateException(Exception):
+    """
+            This exception class is for when a user tries to reserve a slot that is already taken
+    Should never be called (prevented on the frontend), but a good catch
+    """
+    def __init__(self, date_str):
+        self.message = f"You cannot request a date further than one week in the future!"
         super().__init__(self.message)
 
 
