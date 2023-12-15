@@ -117,6 +117,13 @@
             window.location.href = `/user/reserve?date=${dateSelect.value}`;
         })
 
+        //attribution to GPT: got logic to re-fetch the newest data when the user navigates back to this page.
+        window.addEventListener("pageshow", function (event) {
+            if (event.persisted) {
+                window.location.reload();
+            }
+        });
+
     </script>
 
 {% endblock %}
