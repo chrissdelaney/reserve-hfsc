@@ -55,9 +55,6 @@ class SpreadsheetService:
         formatted_dates = [date.strftime("%m/%d/%Y") for date in next_7_days]
         return formatted_dates
 
-    # READING DATA
-    # ... TODO: consider passing the sheet or the sheet name, and getting the sheet only if necessary
-
     @property
     def doc(self):
         """note: this will make an API call each time, to get the new data"""
@@ -71,7 +68,7 @@ class SpreadsheetService:
         all_records = sheet.get_all_records()  # Get all the data from the sheet
 
         student_reservations = []
-        for record in all_records: # ... TODO: some optimization, looping through each reservation may not be efficient. but this is fine for now
+        for record in all_records: # ... some optimization, looping through each reservation may not be efficient. but this is fine for now
             if record['student_email'] == student_email and record['status'] != "canceled":
                 reservation = {
                     'date': record['res_date'],
@@ -87,10 +84,11 @@ class SpreadsheetService:
         sheet = self.get_sheet("table")
         dates = sheet.col_values(1)
 
-        try: #index logic from ChatGPT
+        try:
             start_index = dates.index(date_str) + 1
         except ValueError:
-            return "Date not found in sheet."
+            self.__add_reservation_dates(date_str)
+            start_index = dates.index(date_str) + 1 #write new rows to the sheet, now it will include the date...
         
         upcoming_week_data = sheet.row_values(start_index)
 
@@ -113,8 +111,7 @@ class SpreadsheetService:
         if res_date in dates:
             res_row = dates.index(res_date) + 1
         else:
-            # TODO: implement logic to add row to sheet; will make the code self-sustaining
-            pass
+            raise Exception("reservation date does not exist!")
         
         res_cell = sheet.cell(res_row, res_room + 1)
         res_cell_data = json.loads(res_cell.value) #gets dictionary object of times and emails for that date and room number
@@ -161,7 +158,7 @@ class SpreadsheetService:
         if res_cell_data[res_time] == "":
             raise ReservatonEmptyException(res_date, res_time, res_room)
         else:
-            # Cancel the reservation by setting the email to an empty string
+            #cancel the reservation by setting the email to an empty string
             res_cell_data[res_time] = ""
 
         sheet.update_cell(res_row, res_room + 1, json.dumps(res_cell_data))
@@ -169,6 +166,11 @@ class SpreadsheetService:
         print(f"SUCCESSFULLY CANCELED RESERVATION - {res_room} on {res_date} at {res_time}")
 
         self.__remove_reservation_record(student_name, student_email, res_date, res_time, res_room)
+
+        return json.dumps({
+            "statusCode": 200,
+            "message": "Successfully canceled reservation!"
+        })
 
 
     def __remove_reservation_record(self, student_name, student_email, res_date, res_time, res_room):
@@ -191,6 +193,22 @@ class SpreadsheetService:
 
 
         print(f"Successfully removed reservation for {student_name} ({student_email}) on {res_date} at {res_time} in Room {res_room}")
+    
+    def __add_reservation_dates(self, date_str):
+        sheet = self.get_sheet("table")
+        
+        dates = sheet.col_values(1)
+    
+        last_date_str = dates[-1]
+        last_date = datetime.strptime(last_date_str, '%m/%d/%Y')
+
+        empty_json = json.dumps({"8:00am": "", "10:00am": "", "12:00pm": "", "2:00pm": "", "4:00pm": "", "6:00pm": "", "8:00pm": "", "10:00pm": ""})
+        
+        for i in range(1, 8): #adding rows for next 7 days...
+            next_date = last_date + timedelta(days=i)
+            next_date_str = next_date.strftime('%m/%d/%Y')
+            row = [next_date_str] + [empty_json for x in range(2, 14)]
+            sheet.append_row(row)
 
 
 

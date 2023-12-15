@@ -14,7 +14,25 @@
             justify-content: center;
             width: 100vw;
         }
+        .btn-cancel {
+            border: none;
+
+            background-color: #041E42;
+            border: none;
+            color: white;
+            font-weight: 500;
+            border-radius: 5px;
+        }
+        .btn-cancel:hover {
+            background-color: #35404f;
+        }
     </style>
+
+    <div id="loading-spinner" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; display: none; justify-content: center; align-items: center; background-color: rgba(255, 255, 255, 0.5); z-index: 1050;">
+        <div class="spinner-border text-secondary" role="status">
+        </div>
+    </div>
+
 
     <div class="reservations-header">
         <h1>Your Reservations</h1>
@@ -37,6 +55,7 @@
                             <th scope="col">Date</th>
                             <th scope="col">Time</th>
                             <th scope="col">Room</th>
+                            <th scope="col"></th>
                         </tr>
                     </thead>
 
@@ -52,6 +71,9 @@
                             <td>
                                 {{ r.room }}
                             </td>
+                            <td>
+                                <button class="btn-cancel">Cancel</button>
+                            </td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -59,5 +81,34 @@
             </div>
         </div>
     {% endif %}
+
+    <script>
+        const cancelButtons = document.querySelectorAll(".btn-cancel");
+        cancelButtons.forEach(b => {
+            b.addEventListener("click", e => {
+                document.querySelector("#loading-spinner").style.display = "flex";
+
+                let tr = e.target.parentNode.parentNode;
+                const date = tr.children[0].textContent.trim();
+                const time = tr.children[1].textContent.trim();
+                const roomNumber = tr.children[2].textContent.trim();
+                console.log(`${time}, ${date}, ${roomNumber}`);
+                
+                fetch(`/user/api/cancel-reservation?date=${date}&time=${time}&room=${roomNumber}`)
+                .then(r => {
+                    console.log(r);
+                    return r.json();
+                })
+                .then(data => {
+                    console.log(data);
+                    location.reload();
+                })
+                .catch(error => {
+                    document.querySelector("#loading-spinner").style.display = "none";
+                    alert(error.message);
+                });
+            })
+        })
+    </script>
 
 {% endblock %}

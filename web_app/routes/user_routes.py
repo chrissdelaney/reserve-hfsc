@@ -33,7 +33,7 @@ def reserve():
 
     return render_template("reserve.html", schedule=schedule, dates=next_week_dates, selected_date=date_str)
 
-@user_routes.route("/user/api/reserve-room")
+@user_routes.route("/user/api/make-reservation")
 @authenticated_route
 def make_reservation():
     print("MAKING A RESERVATION...")
@@ -49,9 +49,25 @@ def make_reservation():
 
     response = service.add_reservation_to_table(user_name, user_email, date, time, room)
 
-#
-# USER PROFILE
-#
+    return response
+
+@user_routes.route("/user/api/cancel-reservation")
+@authenticated_route
+def cancel_reservation():
+    print("CANCELING A RESERVATION...")
+    service = current_app.config["SPREADSHEET_SERVICE"]
+    args = request.args
+    current_user = session.get("current_user")
+
+    user_name = current_user["name"]
+    user_email = current_user["email"]
+    date = args.get("date")
+    time = args.get("time")
+    room = int(args.get("room"))
+
+    response = service.remove_reservation_from_table(user_name, user_email, date, time, room)
+
+    return response
 
 @user_routes.route("/user/profile")
 @authenticated_route
