@@ -19,6 +19,7 @@ def get_google_credentials():
     credentials_file_path = os.getenv('GOOGLE_CREDENTIALS_FILEPATH')
     if credentials_file_path:
         return credentials_file_path
+
     else:
         #locally, return the path to the 'google-credentials-test.json' file
         return os.path.join(os.path.dirname(__file__), "google-credentials-test.json")
