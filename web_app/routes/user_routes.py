@@ -49,6 +49,7 @@ def make_reservation():
 
     response = service.add_reservation_to_table(user_name, user_email, date, time, room)
 
+    return response
 #
 # USER PROFILE
 #
