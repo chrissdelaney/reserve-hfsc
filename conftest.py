@@ -31,7 +31,7 @@ def get_google_credentials():
 def ss():
     """spreadsheet service to use when testing"""
     credentials = get_google_credentials()
-    ss = SpreadsheetService(credentials=credentials, document_id=GOOGLE_SHEETS_TEST_DOCUMENT_ID)
+    ss = SpreadsheetService(credentials_filepath=credentials, document_id=GOOGLE_SHEETS_TEST_DOCUMENT_ID)
     yield ss
 
 @pytest.fixture()
