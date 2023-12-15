@@ -1,59 +1,83 @@
 {% extends "bootstrap_5_layout.html" %}
 {% set active_page = "reservations" %}
 
-{% block head %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='reserve.css') }}">
-{% endblock %}
-
 {% block content %}
 
-    <h1>Reserve a Study Room</h1>
+    <style>
+        .reserve-header {
+            margin-top: 1rem;
+            display: grid;
+            justify-content: center;
+            align-items: center;
+        }
+        .table-wrapper {
+            display: flex;
+            justify-content: center;
+            width: 100vw;
+        }
+        .reserve-btn {
+            color: white;
+            background-color: #041E42;
+            margin: 5px;
+            border-radius: 5px;
+        }
+        .reserve-btn:hover {
+            background-color: #35404f;
 
-    <div style="display: flex; align-items: center; margin-bottom: 20px;">
-        <span style="margin-right: 10px; font-size: 18px; font-weight: bold;">Select a date:</span>
-        <select id="date-select">
-            {% for d in dates %}
-                {% if d == selected_date %}
-                    <option value="{{ d }}" selected>{{ d }}</option>
-                {% else %}
-                    <option value="{{ d }}">{{ d }}</option>
-                {% endif %}
-            {% endfor %}
-        </select>
+        }
+    </style>
+
+    <div class="reserve-header">
+
+        <h1>Reserve a Study Room</h1>
+
+        <div style="display: flex; justify-content: center; margin-bottom: 20px;">
+            <span style="margin-right: 10px; font-size: 18px; font-weight: bold;">Select a date:</span>
+            <select id="date-select">
+                {% for d in dates %}
+                    {% if d == selected_date %}
+                        <option value="{{ d }}" selected>{{ d }}</option>
+                    {% else %}
+                        <option value="{{ d }}">{{ d }}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+
     </div>
 
-    </form>
-
-    <div class="table-responsive">
-        <table class="table table-hover text-center">
-            <thead>
-                <tr>
-                    <th scope="col">Date</th>
-                    <th scope="col">Room</th>
-                    <th scope="col">Times</th>
-                    <th scope="col"></th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for room_num in range(schedule["data"] | length) %} <!--12 rooms-->
-                <tr>
-                    <td>
-                        {{ schedule["date"] }}
-                    </td>
-                    <td>
-                        {{room_num + 1}}
-                    </td>
-                    <td>
-                        {% for time in schedule["data"][room_num].keys() %} <!--8 times-->
-                            {% if schedule["data"][room_num][time] == ""%}
-                                <button class="reserve-btn" style="margin: 5px; background-color: #041e42; color: white; border-radius: 5px;">{{ time }}</button>
-                            {% endif %}
-                        {% endfor %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div class="table-wrapper">
+        <div class="table-responsive">
+            <table class="table table-hover text-center">
+                <thead>
+                    <tr>
+                        <th scope="col">Date</th>
+                        <th scope="col">Room</th>
+                        <th scope="col">Times</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for room_num in range(schedule["data"] | length) %} <!--12 rooms-->
+                    <tr>
+                        <td>
+                            {{ schedule["date"] }}
+                        </td>
+                        <td>
+                            {{room_num + 1}}
+                        </td>
+                        <td>
+                            {% for time in schedule["data"][room_num].keys() %} <!--8 times-->
+                                {% if schedule["data"][room_num][time] == ""%}
+                                    <button class="reserve-btn">{{ time }}</button>
+                                {% endif %}
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <script>
@@ -65,12 +89,6 @@
                 const roomNumber = tr.children[1].textContent.trim();
                 console.log(`${time}, ${date}, ${roomNumber}`);
             });
-            b.addEventListener("mouseover", () => {
-                b.style.backgroundColor = "#63666A";
-            });
-            b.addEventListener("mouseout", () => {
-                b.style.backgroundColor = "#041E42";
-            })
         });
 
         const dateSelect = document.querySelector("#date-select");

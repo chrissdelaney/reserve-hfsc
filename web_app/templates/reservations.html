@@ -2,42 +2,61 @@
 {% set active_page = "reservations" %}
 
 {% block content %}
+    <style>
+        .reservations-header {
+            margin-top: 1rem;
+            display: grid;
+            justify-content: center;
+            align-items: center;
+        }
+        .table-wrapper {
+            display: flex;
+            justify-content: center;
+            width: 100vw;
+        }
+    </style>
 
-    <h1>Your Reservations</h1>
+    <div class="reservations-header">
+        <h1>Your Reservations</h1>
 
-    <p class="lead">Here are your reservations:</p>
+        <p class="lead" style="text-align: center;">Here are your reservations:</p>
+    </div>
 
     {% if reservations|length == 0 %}
-        <p class="lead" >You do not have any reservations. Go to the
-            <a href="/reserve">reserve page</a>!
-        </p>
+        <div class="reservations-header">
+            <p class="lead" >You do not have any reservations. Go to the
+                <a href="/user/reserve">reserve page</a>!
+            </p>
+        </div>
     {% else %}
-        <div class="table-responsive">
-            <table class="table table-hover text-center">
-                <thead>
-                    <tr>
-                        <th scope="col">Date</th>
-                        <th scope="col">Time</th>
-                        <th scope="col">Room</th>
-                    </tr>
-                </thead>
+        <div class="table-wrapper">
+            <div class="table-responsive" style="max-width: 1000px; width: 90%;">
+                <table class="table table-hover text-center">
+                    <thead>
+                        <tr>
+                            <th scope="col">Date</th>
+                            <th scope="col">Time</th>
+                            <th scope="col">Room</th>
+                        </tr>
+                    </thead>
 
-                <tbody>
-                {% for r in reservations %}
-                    <tr>
-                        <td>
-                            {{ r.date }}
-                        </td>
-                        <td>
-                            {{ r.time }}
-                        </td>
-                        <td>
-                            {{ r.room }}
-                        </td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
+                    <tbody>
+                    {% for r in reservations %}
+                        <tr>
+                            <td>
+                                {{ r.date }}
+                            </td>
+                            <td>
+                                {{ r.time }}
+                            </td>
+                            <td>
+                                {{ r.room }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     {% endif %}
 

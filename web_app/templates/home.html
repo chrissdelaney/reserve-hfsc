@@ -5,44 +5,68 @@
 <head>
 
 <style>
-        $font-family-base: var(--#{$prefix}font-sans-serif); 
+    :root {
+        --font-family-base: 'Sans Serif', sans-serif;
+    }
 
-        .header-container {
-            position: center;
-            text-align: center;
-            overflow: hidden; 
-        }
+    .header-container {
+        text-align: center;
+        overflow: hidden; 
+        position: relative;
+        width: 100%;
+        height: min(80vh, 800px);
+    }
 
-        .img-fluid {
-            width: 100%;
-            height: auto; 
-            object-fit: cover;
-            margin: 0; 
-        }
+    .header-text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%); /* Adjusts the position to be truly centered */
+        color: black;
+        background-color: white; 
+        padding: 40px; 
+        border-radius: 10px;
+        font-family: var(--font-family-base); /* Use the CSS variable */
+        text-align: center;
+    }
 
-        .header-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: black;
-            background-color: white; 
-            padding: 40px; 
-            border-radius: 10px;
-            font-family: $font-family-base; 
-            text-align: center
-        }
-    </style>
+    .header-text > h1 {
+        font-size: 2.3rem;
+        font-weight: bold;
+    }
+
+    .header-text > p {
+        font-size: 1.3rem;
+    }
+
+    .btn-navy {
+        background-color: #041E42;
+        border: none;
+        color: white;
+    }
+    .btn-navy:hover {
+        color: white;
+    }
+</style>
+
 </head>
 <body>
 
-    <div class="header-container">
-        <img src="https://www.silman.com/wp-content/uploads/2020/06/Georgetown-University-Student-Center-04.jpg" class="img-fluid" alt="Georgetown University Student Center">
+    <div class="header-container" style="background-image: url('https://www.silman.com/wp-content/uploads/2020/06/Georgetown-University-Student-Center-04.jpg');">
         <div class="header-text">
             <h1>WELCOME TO RESERVE HFSC</h1>
-            <p>Log in with your Georgetown account to make a reservation.</p>
+            <hr>
+            {% if not session["current_user"] %}
+                <p>Log in with your Georgetown account to make a reservation.</p>
+            {% endif %}
             <p>You can make a reservation at any time, up to a week in advance of the current date.</p>
             <p>Reservations are made in 2-hour blocks, throughout the time that the HFSC is open.</p>
+            <br>
+            {% if session["current_user"] %}
+                <button type="button" class="btn btn-lg btn-navy" onclick="window.location.href = '/user/reserve'">Make a Reservation</button>
+            {% else %}
+                <button type="button" class="btn btn-lg btn-navy" onclick="window.location.href = '/login'"">Login with Georgetown NetID</button>
+            {% endif %}
         </div>
     </div>
 
