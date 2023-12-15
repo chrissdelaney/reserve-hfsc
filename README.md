@@ -1,6 +1,6 @@
 # RESERVE HFSC
 
-![Website Image]((https://github.com/chrissdelaney/reserve-hfsc/blob/f98994de12c94acba42e3c2742ae4d375748e6f0/reserve-hfsc-website.PNG)
+![Website Image](https://github.com/chrissdelaney/reserve-hfsc/blob/f98994de12c94acba42e3c2742ae4d375748e6f0/reserve-hfsc-website.PNG)
 
 This README file was created from a google sheets template by Michael Rosetti.
 
