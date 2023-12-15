@@ -2,7 +2,7 @@
 
 A web application starter template, created in Python with the Flask framework. Allows users to login with their Google accounts (via OAuth). Interfaces with a Google Sheets database.
 
-![](https://user-images.githubusercontent.com/1328807/160312385-7ffbbada-4363-4b48-873d-9eca868afef0.png)
+![]([https://user-images.githubusercontent.com/1328807/160312385-7ffbbada-4363-4b48-873d-9eca868afef0.png](https://github.com/chrissdelaney/reserve-hfsc/blob/d2bad8101dc308ba85489e97eb2e96352b0c1111/reserve-hfsc-website.PNG))
 
 ## Prerequisites
 
