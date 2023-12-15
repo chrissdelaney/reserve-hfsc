@@ -13,6 +13,15 @@ This application requires a Python development environment:
 
 For beginners, here are some instructions for how to install Anaconda, and [set up your local Python development environment](https://github.com/prof-rossetti/intro-to-python/blob/main/exercises/local-dev-setup/README.md#anaconda-python-and-pip).
 
+## Prerequisites
+
+This application requires a Python development environment:
+
+  + Git
+  + Anaconda, Python, Pip
+
+For beginners, here are some instructions for how to install Anaconda, and [set up your local Python development environment](https://github.com/prof-rossetti/intro-to-python/blob/main/exercises/local-dev-setup/README.md#anaconda-python-and-pip).
+
 ## Repo Setup
 
 Make a copy of this template repo (as necessary). Clone your copy of the repo onto your local machine. Navigate there from the command-line.
@@ -20,8 +29,8 @@ Make a copy of this template repo (as necessary). Clone your copy of the repo on
 Setup and activate a new Anaconda virtual environment:
 
 ```sh
-conda create -n flask-sheets-env-2023 python=3.10
-conda activate flask-sheets-env-2023
+conda create -n reserve-hfsc-env python=3.10
+conda activate reserve-hfsc-env
 ```
 
 Install package dependencies:
@@ -89,11 +98,9 @@ GOOGLE_CLIENT_SECRET="____________"
 #
 GOOGLE_SHEETS_DOCUMENT_ID="____________"
 
-#
-# GOOGLE ANALYTICS
-#
-GA_TRACKER_ID="UA-XXXXXXX-1"
-```
+
+##
+NOTE: if you want to use a separate testing environment, repeat the previous steps to create a separate Google Sheet, credentials, and environment variables for the testing.
 
 
 
@@ -105,7 +112,7 @@ GA_TRACKER_ID="UA-XXXXXXX-1"
 After configuring the Google Sheet database and populating it with products, you should be able to test out the app's ability to fetch products (and generate new orders):
 
 ```sh
-python -m app.sheets_service
+python -m app.spreadsheet_service
 ```
 
 ### Web Application
@@ -113,7 +120,7 @@ python -m app.sheets_service
 Run the local web server (then visit localhost:5000 in a browser):
 
 ```sh
-FLASK_APP=web_app flask run
+flask run
 ```
 
 ## Testing
@@ -126,10 +133,6 @@ pytest
 
 > NOTE: we are using a live sheet for testing, so to avoid API rate limits, we are waiting / sleeping between each test, which makes the tests a bit slow for now
 
-
-## CI
-
-See more information about the [CI](/admin/CI.md) build process.
 
 ## Deploying
 
